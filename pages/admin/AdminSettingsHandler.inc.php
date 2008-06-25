@@ -66,8 +66,12 @@ class AdminSettingsHandler extends AdminHandler {
 				$publicFileManager->removeSiteFile($setting[$formLocale]['uploadName']);
 				unset($setting[$formLocale]);
 				$site->setData('pageHeaderTitleImage', $setting);
-				$siteDao =& DAORegistry::getDAO('SiteDAO');
-				$siteDao->updateSite($site);
+				$siteSettingsDao =& DAORegistry::getDAO('SiteSettingsDAO');
+				$siteSettingsDao->deleteSetting('pageHeaderTitleImage', $formLocale);
+
+				// Refresh site header
+				$templateMgr = &TemplateManager::getManager();
+				$templateMgr->assign('displayPageHeaderTitle', $site->getSitePageHeaderTitle());
 			}
 		} elseif ($settingsForm->validate()) {
 			$settingsForm->execute();
