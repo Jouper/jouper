@@ -6,13 +6,15 @@
  * Copyright (c) 2003-2008 John Willinsky
  * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
  *
- * @package pages.article
  * @class ArticleHandler
+ * @ingroup pages_article
  *
- * Handle requests for article functions. 
+ * @brief Handle requests for article functions. 
  *
- * $Id$
  */
+
+// $Id$
+
 
 import('rt.ojs.RTDAO');
 import('rt.ojs.JournalRT');
@@ -204,7 +206,7 @@ class ArticleHandler extends Handler {
 		} else {
 			if (!Request::isBot()) {
 				// Increment the galley's views count
-				$galleyDao->incrementViews($galleyId);
+				$galleyDao->incrementViews($galley->getGalleyId());
 			}
 
 			// Use the article's CSS file, if set.
@@ -215,6 +217,13 @@ class ArticleHandler extends Handler {
 					$styleFile->getFileId()
 				)));
 			}
+		}
+
+		// Add font sizer js and css if not already in header
+		$additionalHeadData = $templateMgr->get_template_vars('additionalHeadData');
+		if (strpos(strtolower($additionalHeadData), 'sizer.js') === false) {
+			$additionalHeadData .= $templateMgr->fetch('common/sizer.tpl');
+			$templateMgr->assign('additionalHeadData', $additionalHeadData);
 		}
 
 		$templateMgr->assign_by_ref('issue', $issue);
