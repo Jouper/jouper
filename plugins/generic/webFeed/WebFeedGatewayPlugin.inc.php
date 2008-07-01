@@ -6,13 +6,15 @@
  * Copyright (c) 2003-2008 John Willinsky
  * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
  *
- * @package plugins.generic.webFeed
  * @class WebFeedGatewayPlugin
+ * @ingroup plugins_generic_webFeed
  *
- * Gateway component of web feed plugin
+ * @brief Gateway component of web feed plugin
  *
- * $Id$
  */
+
+// $Id$
+
 
 import('classes.plugins.GatewayPlugin');
 
@@ -107,7 +109,11 @@ class WebFeedGatewayPlugin extends GatewayPlugin {
 			$publishedArticles = &$publishedArticleDao->getPublishedArticlesInSections($issue->getIssueId());
 		}
 
+		$versionDao =& DAORegistry::getDAO('VersionDAO');
+		$version =& $versionDao->getCurrentVersion();
+
 		$templateMgr = &TemplateManager::getManager();
+		$templateMgr->assign('ojsVersion', $version->getVersionString());
 		$templateMgr->assign_by_ref('publishedArticles', $publishedArticles);
 		$templateMgr->assign_by_ref('journal', $journal);
 		$templateMgr->assign_by_ref('issue', $issue);
