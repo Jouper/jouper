@@ -1,18 +1,19 @@
 <?php
 
 /**
- * @file SectionEditorAction.inc.php
+ * @file classes/submission/sectionEditor/SectionEditorAction.inc.php
  *
  * Copyright (c) 2003-2008 John Willinsky
  * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
  *
- * @package submission
  * @class SectionEditorAction
+ * @ingroup submission
  *
- * SectionEditorAction class.
- *
- * $Id$
+ * @brief SectionEditorAction class.
  */
+
+// $Id$
+
 
 import('submission.common.Action');
 
@@ -108,7 +109,7 @@ class SectionEditorAction extends Action {
 			$sectionDao =& DAORegistry::getDAO('SectionDAO');
 			$reviewFormDao =& DAORegistry::getDAO('ReviewFormDAO');
 
-			$sectionId =& $sectionEditorSubmission->getSectionId();
+			$sectionId = $sectionEditorSubmission->getSectionId();
 			$section =& $sectionDao->getSection($sectionId, $journalId);
 			if ($section && ($reviewFormId = (int) $section->getReviewFormId())) {
 				if ($reviewFormDao->reviewFormExists($reviewFormId, $journalId)) {
