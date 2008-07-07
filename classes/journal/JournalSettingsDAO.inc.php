@@ -1,19 +1,19 @@
 <?php
 
 /**
- * @file JournalSettingsDAO.inc.php
+ * @file classes/journal/JournalSettingsDAO.inc.php
  *
  * Copyright (c) 2003-2008 John Willinsky
  * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
  *
- * @package journal
  * @class JournalSettingsDAO
+ * @ingroup journal
  *
- * Class for Journal Settings DAO.
- * Operations for retrieving and modifying journal settings.
- *
- * $Id$
+ * @brief Operations for retrieving and modifying journal settings.
  */
+
+// $Id$
+
 
 class JournalSettingsDAO extends DAO {
 	function &_getCache($journalId) {
@@ -126,8 +126,8 @@ class JournalSettingsDAO extends DAO {
 			);
 		} else {
 			if (is_array($value)) foreach ($value as $locale => $localeValue) {
-				if (empty($localeValue)) continue;
 				$this->update('DELETE FROM journal_settings WHERE journal_id = ? AND setting_name = ? AND locale = ?', array($journalId, $name, $locale));
+				if (empty($localeValue)) continue;
 				$type = null;
 				$this->update('INSERT INTO journal_settings
 					(journal_id, setting_name, setting_value, setting_type, locale)
