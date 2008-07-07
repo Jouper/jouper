@@ -6,10 +6,10 @@
  * Copyright (c) 2003-2008 John Willinsky
  * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
  *
- * @package pages.manager
  * @class ReviewFormHandler
+ * @ingroup pages_manager
  *
- * Handle requests for review form management functions.
+ * @brief Handle requests for review form management functions.
  *
 */
 
@@ -145,7 +145,7 @@ class ReviewFormHandler extends ManagerHandler {
 		$templateMgr->assign('pageTitle', 'manager.reviewForms.preview');
 		$templateMgr->assign_by_ref('reviewForm', $reviewForm);
 		$templateMgr->assign('reviewFormElements', $reviewFormElements);
-		$templateMgr->register_function('form_language_chooser', array(&$this, 'smartyFormLanguageChooser'));
+		$templateMgr->register_function('form_language_chooser', array('ReviewFormHandler', 'smartyFormLanguageChooser'));
 		$templateMgr->assign('helpTopicId','journal.managementPages.reviewForms');
 		$templateMgr->display('manager/reviewForms/previewReviewForm.tpl');
 	}
