@@ -6,13 +6,14 @@
  * Copyright (c) 2003-2008 John Willinsky
  * Distributed under the GNU GPL v2. For full terms see the file docs/COPYING.
  *
- * @package pages.manager
  * @class SectionHandler
+ * @ingroup pages_manager
  *
- * Handle requests for section management functions. 
- *
- * $Id$
+ * @brief Handle requests for section management functions. 
  */
+
+// $Id$
+
 
 class SectionHandler extends ManagerHandler {
 
@@ -70,7 +71,7 @@ class SectionHandler extends ManagerHandler {
 		import('manager.form.SectionForm');
 		$sectionForm = &new SectionForm(!isset($args) || empty($args) ? null : ((int) $args[0]));
 
-		switch (Request::getUserVar('action')) {
+		switch (Request::getUserVar('editorAction')) {
 			case 'addSectionEditor':
 				$sectionForm->includeSectionEditor((int) Request::getUserVar('userId'));
 				$canExecute = false;
