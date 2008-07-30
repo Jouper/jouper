@@ -52,8 +52,6 @@ class PluginSettingsDAO extends DAO {
 		$journalId = array_pop($contextParts);
 		$settings =& $this->getPluginSettings($journalId, $cache->getCacheId());
 		if (!isset($settings[$id])) {
-			// Make sure that even null values are cached
-			$cache->setCache($id, null);
 			return null;
 		}
 		return $settings[$id];
@@ -66,32 +64,24 @@ class PluginSettingsDAO extends DAO {
 	 * @return array
 	 */
 	function &getPluginSettings($journalId, $pluginName) {
-		$pluginSettings[$pluginName] = array();
+		$pluginSettings = array();
 
 		$result = &$this->retrieve(
 			'SELECT setting_name, setting_value, setting_type FROM plugin_settings WHERE plugin_name = ? AND journal_id = ?', array($pluginName, $journalId)
 		);
 
-		if ($result->RecordCount() == 0) {
-			$returner = null;
-			$result->Close();
-			return $returner;
-
-		} else {
-			while (!$result->EOF) {
-				$row = &$result->getRowAssoc(false);
-				$value = $this->convertFromDB($row['setting_value'], $row['setting_type']);
-				$pluginSettings[$pluginName][$row['setting_name']] = $value;
-				$result->MoveNext();
-			}
-			$result->close();
-			unset($result);
-
-			$cache =& $this->_getCache($journalId, $pluginName);
-			$cache->setEntireCache($pluginSettings[$pluginName]);
-
-			return $pluginSettings[$pluginName];
+		while (!$result->EOF) {
+			$row = &$result->getRowAssoc(false);
+			$pluginSettings[$row['setting_name']] = $this->convertFromDB($row['setting_value'], $row['setting_type']);
+			$result->MoveNext();
 		}
+		$result->Close();
+		unset($result);
+
+		$cache =& $this->_getCache($journalId, $pluginName);
+		$cache->setEntireCache($pluginSettings);
+
+		return $pluginSettings;
 	}
 
 	/**
@@ -143,7 +133,7 @@ class PluginSettingsDAO extends DAO {
 	 * @param $name string
 	 */
 	function deleteSetting($journalId, $pluginName, $name) {
-		$cache =& $this->_getCache($pluginName);
+		$cache =& $this->_getCache($journalId, $pluginName);
 		$cache->setCache($name, null);
 
 		return $this->update(
@@ -154,14 +144,16 @@ class PluginSettingsDAO extends DAO {
 
 	/**
 	 * Delete all settings for a plugin.
+	 * @param $journalId int
 	 * @param $pluginName string
 	 */
-	function deleteSettingsByPlugin($pluginName) {
-		$cache =& $this->_getCache($pluginName);
+	function deleteSettingsByPlugin($journalId, $pluginName) {
+		$cache =& $this->_getCache($journalId, $pluginName);
 		$cache->flush();
 
 		return $this->update(
-				'DELETE FROM plugin_settings WHERE plugin_name = ?', $pluginName
+			'DELETE FROM plugin_settings WHERE journal_id = ? AND plugin_name = ?', 
+			array($journalId, $pluginName)
 		);
 	}
 
@@ -171,7 +163,7 @@ class PluginSettingsDAO extends DAO {
 	 */
 	function deleteSettingsByJournalId($journalId) {
 		return $this->update(
-				'DELETE FROM plugin_settings WHERE journal_id = ?', $journalId
+			'DELETE FROM plugin_settings WHERE journal_id = ?', $journalId
 		);
 	}
 
