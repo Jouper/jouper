@@ -20,6 +20,17 @@
 import('core.PKPApplication');
 
 class OJSApplication extends PKPApplication {
+	function OJSApplication() {
+		parent::PKPApplication();
+	}
+
+	function initialize(&$application) {
+		PKPApplication::initialize($application);
+
+		import('i18n.Locale');
+		import('core.Request');
+	}
+
 	/**
 	 * Get the "context depth" of this application, i.e. the number of
 	 * parts of the URL after index.php that represent the context of
@@ -57,7 +68,7 @@ class OJSApplication extends PKPApplication {
 		if (!Config::getVar('general', 'installed')) return false;
 		if (!empty($_POST) || Validation::isLoggedIn()) return false;
 		if (!Config::getVar('cache', 'web_cache')) return false;
-		if (!Request::isPathInfoEnabled()) {
+		if (!PKPRequest::isPathInfoEnabled()) {
 			$ok = array('journal', 'page', 'op', 'path');
 			if (!empty($_GET) && count(array_diff(array_keys($_GET), $ok)) != 0) {
 				return false;
@@ -66,7 +77,7 @@ class OJSApplication extends PKPApplication {
 			if (!empty($_GET)) return false;
 		}
 
-		if (in_array(Request::getRequestedPage(), array(
+		if (in_array(PKPRequest::getRequestedPage(), array(
 			'about', 'announcement', 'help', 'index', 'information', 'rt', 'issue', ''
 		))) return true;
 
@@ -80,7 +91,7 @@ class OJSApplication extends PKPApplication {
 	function getCacheFilename() {
 		static $cacheFilename;
 		if (!isset($cacheFilename)) {
-			if (Request::isPathInfoEnabled()) {
+			if (PKPRequest::isPathInfoEnabled()) {
 				$id = isset($_SERVER['PATH_INFO'])?$_SERVER['PATH_INFO']:'index';
 				$id .= '-' . Locale::getLocale();
 			} else {
@@ -97,7 +108,9 @@ class OJSApplication extends PKPApplication {
 	 * @return array
 	 */
 	function getDAOMap() {
-		return array(
+		return array_merge(parent::getDAOMap(), array(
+			'AnnouncementDAO' => 'announcement.AnnouncementDAO',
+			'AnnouncementTypeDAO' => 'announcement.AnnouncementTypeDAO',
 			'ArticleEmailLogDAO' => 'article.log.ArticleEmailLogDAO',
 			'ArticleEventLogDAO' => 'article.log.ArticleEventLogDAO',
 			'ArticleCommentDAO' => 'article.ArticleCommentDAO',
@@ -105,64 +118,58 @@ class OJSApplication extends PKPApplication {
 			'ArticleFileDAO' => 'article.ArticleFileDAO',
 			'ArticleGalleyDAO' => 'article.ArticleGalleyDAO',
 			'ArticleNoteDAO' => 'article.ArticleNoteDAO',
-			'AuthorDAO' => 'article.AuthorDAO',
-			'CaptchaDAO' => 'captcha.CaptchaDAO',
-			'PublishedArticleDAO' => 'article.PublishedArticleDAO',
-			'SuppFileDAO' => 'article.SuppFileDAO',
-			'DAO' => 'db.DAO',
-			'XMLDAO' => 'db.XMLDAO',
-			'HelpTocDAO' => 'help.HelpTocDAO',
-			'HelpTopicDAO' => 'help.HelpTopicDAO',
-			'IssueDAO' => 'issue.IssueDAO',
-			'JournalDAO' => 'journal.JournalDAO',
-			'CountryDAO' => 'i18n.CountryDAO',
-			'JournalStatisticsDAO' => 'journal.JournalStatisticsDAO',
-			'JournalSettingsDAO' => 'journal.JournalSettingsDAO',
-			'SectionDAO' => 'journal.SectionDAO',
-			'SectionEditorsDAO' => 'journal.SectionEditorsDAO',
-			'NotificationStatusDAO' => 'journal.NotificationStatusDAO',
-			'EmailTemplateDAO' => 'mail.EmailTemplateDAO',
-			'OAIDAO' => 'oai.ojs.OAIDAO',
-			'ScheduledTaskDAO' => 'scheduledTask.ScheduledTaskDAO',
 			'ArticleSearchDAO' => 'search.ArticleSearchDAO',
-			'RoleDAO' => 'security.RoleDAO',
-			'SessionDAO' => 'session.SessionDAO',
-			'SiteDAO' => 'site.SiteDAO',
-			'SiteSettingsDAO' => 'site.SiteSettingsDAO',
-			'VersionDAO' => 'site.VersionDAO',
+			'AuthorDAO' => 'article.AuthorDAO',
 			'AuthorSubmissionDAO' => 'submission.author.AuthorSubmissionDAO',
+			'CommentDAO' => 'comment.CommentDAO',
 			'CopyAssignmentDAO' => 'submission.copyAssignment.CopyAssignmentDAO',
 			'CopyeditorSubmissionDAO' => 'submission.copyeditor.CopyeditorSubmissionDAO',
 			'EditAssignmentDAO' => 'submission.editAssignment.EditAssignmentDAO',
 			'EditorSubmissionDAO' => 'submission.editor.EditorSubmissionDAO',
-			'LayoutAssignmentDAO' => 'submission.layoutAssignment.LayoutAssignmentDAO',
-			'LayoutEditorSubmissionDAO' => 'submission.layoutEditor.LayoutEditorSubmissionDAO',
-			'ProofAssignmentDAO' => 'submission.proofAssignment.ProofAssignmentDAO',
-			'ProofreaderSubmissionDAO' => 'submission.proofreader.ProofreaderSubmissionDAO',
-			'ReviewAssignmentDAO' => 'submission.reviewAssignment.ReviewAssignmentDAO',
-			'ReviewerSubmissionDAO' => 'submission.reviewer.ReviewerSubmissionDAO',
-			'SectionEditorSubmissionDAO' => 'submission.sectionEditor.SectionEditorSubmissionDAO',
-			'UserDAO' => 'user.UserDAO',
-			'UserSettingsDAO' => 'user.UserSettingsDAO',
-			'RTDAO' => 'rt.ojs.RTDAO',
-			'CurrencyDAO' => 'currency.CurrencyDAO',
-			'SubscriptionDAO' => 'subscription.SubscriptionDAO',
-			'SubscriptionTypeDAO' => 'subscription.SubscriptionTypeDAO',
-			'AnnouncementDAO' => 'announcement.AnnouncementDAO',
-			'AnnouncementTypeDAO' => 'announcement.AnnouncementTypeDAO',
-			'TemporaryFileDAO' => 'file.TemporaryFileDAO',
-			'CommentDAO' => 'comment.CommentDAO',
-			'AuthSourceDAO' => 'security.AuthSourceDAO',
-			'AccessKeyDAO' => 'security.AccessKeyDAO',
-			'PluginSettingsDAO' => 'plugins.PluginSettingsDAO',
+			'EmailTemplateDAO' => 'mail.EmailTemplateDAO',
 			'GroupDAO' => 'group.GroupDAO',
 			'GroupMembershipDAO' => 'group.GroupMembershipDAO',
-			'QueuedPaymentDAO' => 'payment.QueuedPaymentDAO',
+			'IssueDAO' => 'issue.IssueDAO',
+			'JournalDAO' => 'journal.JournalDAO',
+			'JournalSettingsDAO' => 'journal.JournalSettingsDAO',
+			'JournalStatisticsDAO' => 'journal.JournalStatisticsDAO',
+			'LayoutAssignmentDAO' => 'submission.layoutAssignment.LayoutAssignmentDAO',
+			'LayoutEditorSubmissionDAO' => 'submission.layoutEditor.LayoutEditorSubmissionDAO',
+			'NotificationStatusDAO' => 'journal.NotificationStatusDAO',
+			'OAIDAO' => 'oai.ojs.OAIDAO',
 			'OJSCompletedPaymentDAO' => 'payment.ojs.OJSCompletedPaymentDAO',
+			'PluginSettingsDAO' => 'plugins.PluginSettingsDAO',
+			'ProofAssignmentDAO' => 'submission.proofAssignment.ProofAssignmentDAO',
+			'ProofreaderSubmissionDAO' => 'submission.proofreader.ProofreaderSubmissionDAO',
+			'PublishedArticleDAO' => 'article.PublishedArticleDAO',
+			'QueuedPaymentDAO' => 'payment.QueuedPaymentDAO',
+			'ReviewAssignmentDAO' => 'submission.reviewAssignment.ReviewAssignmentDAO',
+			'ReviewerSubmissionDAO' => 'submission.reviewer.ReviewerSubmissionDAO',
 			'ReviewFormDAO' => 'reviewForm.ReviewFormDAO',
 			'ReviewFormElementDAO' => 'reviewForm.ReviewFormElementDAO',
-			'ReviewFormResponseDAO' => 'reviewForm.ReviewFormResponseDAO'
-		);
+			'ReviewFormResponseDAO' => 'reviewForm.ReviewFormResponseDAO',
+			'RoleDAO' => 'security.RoleDAO',
+			'RTDAO' => 'rt.ojs.RTDAO',
+			'SectionDAO' => 'journal.SectionDAO',
+			'SectionEditorsDAO' => 'journal.SectionEditorsDAO',
+			'SuppFileDAO' => 'article.SuppFileDAO',
+			'ScheduledTaskDAO' => 'scheduledTask.ScheduledTaskDAO',
+			'SectionEditorSubmissionDAO' => 'submission.sectionEditor.SectionEditorSubmissionDAO',
+			'SubscriptionDAO' => 'subscription.SubscriptionDAO',
+			'SubscriptionTypeDAO' => 'subscription.SubscriptionTypeDAO',
+			'UserDAO' => 'user.UserDAO',
+			'UserSettingsDAO' => 'user.UserSettingsDAO'
+		));
+	}
+
+	/**
+	 * Instantiate the help object for this application.
+	 * @return object
+	 */
+	function &instantiateHelp() {
+		import('help.Help');
+		$help =& new Help();
+		return $help;
 	}
 }
 
